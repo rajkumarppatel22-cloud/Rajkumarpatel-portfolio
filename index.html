@@ -151,6 +151,7 @@
   .form-group textarea { min-height: 110px; }
   .form-submit { width: 100%; padding: 13px; border-radius: 12px; border: none; background: linear-gradient(135deg,var(--c1),var(--c2)); color: #fff; font-family: var(--font); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 24px rgba(108,99,255,0.35); }
   .form-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+  .form-status { margin-top: 0.75rem; font-size: 0.82rem; color: var(--muted); line-height: 1.5; min-height: 1.2rem; }
 
   footer { text-align: center; padding: 2rem 5%; border-top: 1px solid var(--glass-border); color: var(--muted); font-size: 0.8rem; }
   footer span { color: var(--c2); }
@@ -434,13 +435,16 @@
       </div>
     </div>
     <div class="contact-form glass reveal">
-      <div class="form-row">
-        <div class="form-group"><label>Your name</label><input type="text" placeholder="John Doe" /></div>
-        <div class="form-group"><label>Your email</label><input type="email" placeholder="john@example.com" /></div>
-      </div>
-      <div class="form-group"><label>Subject</label><input type="text" placeholder="Project Inquiry" /></div>
-      <div class="form-group"><label>Message</label><textarea placeholder="Tell me about your project..."></textarea></div>
-      <button class="form-submit" onclick="this.textContent='Message sent ✓';this.style.background='linear-gradient(135deg,#059669,#10b981)'">Send Message</button>
+      <form id="contactForm">
+        <div class="form-row">
+          <div class="form-group"><label>Your name</label><input type="text" name="name" placeholder="John Doe" required /></div>
+          <div class="form-group"><label>Your email</label><input type="email" name="email" placeholder="john@example.com" required /></div>
+        </div>
+        <div class="form-group"><label>Subject</label><input type="text" name="subject" placeholder="Project Inquiry" required /></div>
+        <div class="form-group"><label>Message</label><textarea name="message" placeholder="Tell me about your project..." required></textarea></div>
+        <button type="submit" class="form-submit">Send Message</button>
+        <p id="formStatus" class="form-status" aria-live="polite"></p>
+      </form>
     </div>
   </div>
 </section>
@@ -476,6 +480,35 @@ document.addEventListener('mousemove', (e) => {
   document.querySelector('.orb2').style.transform=`translate(${-cx*.4}px,${-cy*.4}px)`;
   document.querySelector('.orb3').style.transform=`translate(${cx*.2}px,${cy*.2}px)`;
 });
+
+const contactForm = document.getElementById('contactForm');
+const formStatus = document.getElementById('formStatus');
+
+if (contactForm) {
+  contactForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const data = new FormData(contactForm);
+    const name = (data.get('name') || '').toString().trim();
+    const email = (data.get('email') || '').toString().trim();
+    const subject = (data.get('subject') || '').toString().trim();
+    const message = (data.get('message') || '').toString().trim();
+
+    if (!name || !email || !subject || !message) {
+      formStatus.textContent = 'Please fill all fields before sending.';
+      return;
+    }
+
+    const mailSubject = encodeURIComponent(subject);
+    const mailBody = encodeURIComponent(`Name: ${name}
+Email: ${email}
+
+Message:
+${message}`);
+    formStatus.textContent = 'Opening your email app... please click Send to deliver your message.';
+    window.location.href = `mailto:patelraj7946@gmail.com?subject=${mailSubject}&body=${mailBody}`;
+    contactForm.reset();
+  });
+}
 </script>
 </body>
 </html>
